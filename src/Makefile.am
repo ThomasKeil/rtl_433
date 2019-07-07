@@ -105,6 +105,7 @@ rtl_433_SOURCES      = abuf.c \
                        devices/proove.c \
                        devices/quhwa.c \
                        devices/radiohead_ask.c \
+                       devices/renkforce_aok5505.c \
                        devices/rftech.c \
                        devices/rubicson.c \
                        devices/s3318p.c \

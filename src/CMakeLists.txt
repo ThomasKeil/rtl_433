@@ -104,6 +104,7 @@ add_executable(rtl_433
 	devices/proove.c
 	devices/quhwa.c
 	devices/radiohead_ask.c
+	devices/renkforce_aok5055.c
 	devices/rftech.c
 	devices/rubicson.c
 	devices/s3318p.c

@@ -137,6 +137,7 @@
     DECL(ecowitt) \
     DECL(directv) \
     DECL(eurochron) \
+    DECL(renkforce_aok5505) \
     /* Add new decoders here. */
 
 #define DECL(name) extern r_device name;
