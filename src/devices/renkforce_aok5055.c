@@ -93,7 +93,7 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
             "temperature", "Temperature", DATA_FORMAT, "%.1f C", DATA_DOUBLE, temperature,
             "humidity", "Humidity", DATA_FORMAT, "%u %%", DATA_INT, humidity,
             "wind_direction", "Wind direction", DATA_STRING, direction_lookup[wind_direction],
-            "wind_degress", "Wind degrees", DATA_FORMAT, "%.1f °", DATA_DOUBLE, wind_degrees,
+            "wind_degrees", "Wind degrees", DATA_FORMAT, "%.1f °", DATA_DOUBLE, wind_degrees,
             "wind_speed", "Wind speed", DATA_FORMAT, "%u km/h", DATA_INT, wind_speed,
             "rain_volume", "Rain volume", DATA_FORMAT, "%.1f mm", DATA_DOUBLE, rain_mm,
             "battery", "Battery", DATA_INT, 1,
