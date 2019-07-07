@@ -85,6 +85,7 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
     int wind_speed = ((bytes[8] & 0x0f) << 8) | (bytes[9] >> 4);
     double rain_mm = rain_steps * 0.75;
     int wind_direction = (bytes[9] & 0x0f);
+    double wind_degrees = wind_direction * 22.5; 
 
 
     data = data_make(
@@ -92,6 +93,7 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
             "temperature", "Temperature", DATA_FORMAT, "%.1f C", DATA_DOUBLE, temperature,
             "humidity", "Humidity", DATA_FORMAT, "%u %%", DATA_INT, humidity,
             "wind_direction", "Wind direction", DATA_STRING, direction_lookup[wind_direction],
+            "wind_degress", "Wind degrees", DATA_FORMAT, "%.1f °", DATA_DOUBLE, wind_degrees,
             "wind_speed", "Wind speed", DATA_FORMAT, "%u km/h", DATA_INT, wind_speed,
             "rain_volume", "Rain volume", DATA_FORMAT, "%.1f mm", DATA_DOUBLE, rain_mm,
             "battery", "Battery", DATA_INT, 1,
@@ -106,6 +108,7 @@ static char *renkforce_aok5055_output_fields[] = {
     "temperature",
     "humidity",
     "wind_direction",
+    "wind_degrees",
     "wind_speed",
     "rain_volume",
     "battery",
