@@ -60,11 +60,31 @@ static unsigned char direction_lookup[16][4] = {
         "NNW"
 };
 
+void thomas_tohex(unsigned char * in, size_t insz, char * out, size_t outsz)
+{
+    unsigned char * pin = in;
+    const char * hex = "0123456789ABCDEF";
+    char * pout = out;
+    for(; pin < in+insz; pout +=3, pin++){
+        pout[0] = hex[(*pin>>4) & 0xF];
+        pout[1] = hex[ *pin     & 0xF];
+        pout[2] = ':';
+        if (pout + 3 - out > outsz){
+            /* Better to truncate output string than overflow buffer */
+            /* it would be still better to either return a status */
+            /* or ensure the target buffer is large enough and it never happen */
+            break;
+        }
+    }
+    pout[-1] = 0;
+}
+
 static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
 {
     data_t *data;
 
     unsigned char bytes[18]; // aligned packet data
+    unsigned char raw[37];
     
     bitbuffer_invert(bitbuffer);
 
@@ -77,6 +97,8 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
 
 
     bitbuffer_extract_bytes(bitbuffer, 0, bitpos, bytes, AOK5055_MESSAGE_BITLEN);
+
+    thomas_tohex(bytes, 18, raw,37);
 
     int humidity = bytes[6];
     int temperature_c = ((bytes[4] & 0x0f) << 8) | bytes[5];
@@ -97,6 +119,7 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
             "wind_speed", "Wind speed", DATA_FORMAT, "%u km/h", DATA_INT, wind_speed,
             "rain_volume", "Rain volume", DATA_FORMAT, "%.1f mm", DATA_DOUBLE, rain_mm,
             "battery", "Battery", DATA_STRING, battery ? "LOW" : "OK",
+            "raw", "Raw", DATA_STRING, raw,
             NULL);
 
     decoder_output_data(decoder, data);
@@ -111,6 +134,7 @@ static char *renkforce_aok5055_output_fields[] = {
     "wind_speed",
     "rain_volume",
     "battery",
+    "raw",
     NULL
 };
 
