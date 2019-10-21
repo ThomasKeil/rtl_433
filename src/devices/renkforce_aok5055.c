@@ -25,14 +25,14 @@
  */
 #include "decoder.h"
 
-// The lenght of a message in bits
-#define AOK5055_MESSAGE_BITLEN      12 * 8
+// The lenght of a message in bytes
+#define AOK5055_MESSAGE_LEN 12
 
 // The lenght of the preamble in bits
 #define AOK5055_MESSAGE_PREAMBLELEN  3 * 8
 
 // How often needs the message to be repeated 
-#define AOK5055_MINREPEATS  3
+#define AOK5055_MINREPEATS  4
 
 #define AOK5055_MILLIMETER_PER_STEP 0.75
 
@@ -60,7 +60,7 @@ static unsigned char direction_lookup[16][4] = {
         "NNW"
 };
 
-void thomas_tohex(unsigned char * in, size_t insz, char * out, size_t outsz)
+void bytes_tohex(unsigned char * in, size_t insz, char * out, size_t outsz)
 {
     unsigned char * pin = in;
     const char * hex = "0123456789ABCDEF";
@@ -83,8 +83,8 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
 {
     data_t *data;
 
-    unsigned char bytes[18]; // aligned packet data
-    unsigned char raw[37];
+    unsigned char bytes[AOK5055_MESSAGE_LEN * AOK5055_MINREPEATS + 1]; // aligned packet data
+    unsigned char raw[AOK5055_MESSAGE_LEN * 3 + 1]; // Two chars plus ":" = 3
     
     bitbuffer_invert(bitbuffer);
 
@@ -95,10 +95,28 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
         return 0;
     }
 
+    // Check if the row is long enough to contain the repeats
+    if (bitpos + AOK5055_MINREPEATS * AOK5055_MESSAGE_LEN * 8 > bitbuffer->bits_per_row[0]) {
+        return 0;
+    }
 
-    bitbuffer_extract_bytes(bitbuffer, 0, bitpos, bytes, AOK5055_MESSAGE_BITLEN);
+    bitbuffer_extract_bytes(bitbuffer, 0, bitpos, bytes, AOK5055_MESSAGE_LEN * 8 * AOK5055_MINREPEATS);
+    
+    // bitbuffer_print(bitbuffer);
 
-    thomas_tohex(bytes, 18, raw,37);
+ 
+    // See if the message is repated AOK5055_MINREPEATS in the row.
+    // Don't compare the last byte since the very last time it differs and "pause" is irrelevat
+    // for the values anyways
+    for (int position=0; position<AOK5055_MESSAGE_LEN - 1; position++) {
+        for (int repeat=1; repeat <= AOK5055_MINREPEATS - 1; repeat++) {
+            if (bytes[position] != bytes[position + (AOK5055_MESSAGE_LEN * repeat)]) {
+                return 0;
+            }
+        }
+    }
+
+    bytes_tohex(bytes, 18, raw, 37);
 
     int humidity = bytes[6];
     int temperature_c = ((bytes[4] & 0x0f) << 8) | bytes[5];
@@ -148,3 +166,4 @@ r_device renkforce_aok5505 = {
     .fields         = renkforce_aok5055_output_fields,
 
 };
+
