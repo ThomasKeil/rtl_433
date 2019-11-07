@@ -119,14 +119,20 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
     bytes_tohex(bytes, 18, raw, 37);
 
     int humidity = bytes[6];
-    int temperature_c = ((bytes[4] & 0x0f) << 8) | bytes[5];
     int rain_steps = ((bytes[7]) << 4) | ((bytes[8]) >> 4);
-    float temperature = (float)temperature_c / 10.0;
     int wind_speed = ((bytes[8] & 0x0f) << 8) | (bytes[9] >> 4);
     double rain_mm = rain_steps * AOK5055_MILLIMETER_PER_STEP;
     int wind_direction = (bytes[9] & 0x0f);
     double wind_degrees = wind_direction * 22.5;
-    uint8_t battery = (bytes[4] & 0xf0) == 0xf0; 
+    uint8_t battery = (bytes[4] & 0xf0) == 0xf0;
+
+    // Temperature can be negative
+    int temperature_c = ((bytes[4] & 0x0f) << 8) | bytes[5];
+    if (bytes[4] & 0x08) { // Bit 4 of Temperature is set, thus its negative
+        // 2 complement
+        temperature_c = ((temperature_c - 1) ^ 0xFFF) * -1; 
+    } 
+    float temperature = (float)temperature_c / 10.0;
 
     data = data_make(
             "model", "", DATA_STRING, "Renkforce AOK5055",
