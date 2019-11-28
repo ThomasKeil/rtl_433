@@ -120,7 +120,7 @@ static int renkforce_aok5055_callback(r_device *decoder, bitbuffer_t *bitbuffer)
 
     int humidity = bytes[6];
     int rain_steps = ((bytes[7]) << 4) | ((bytes[8]) >> 4);
-    int wind_speed = ((bytes[8] & 0x0f) << 8) | (bytes[9] >> 4);
+    int wind_speed = ((bytes[8] & 0x0f) << 4) | (bytes[9] >> 4);
     double rain_mm = rain_steps * AOK5055_MILLIMETER_PER_STEP;
     int wind_direction = (bytes[9] & 0x0f);
     double wind_degrees = wind_direction * 22.5;
